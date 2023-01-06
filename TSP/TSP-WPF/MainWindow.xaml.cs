@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using TSP_WPF.ViewModels;
 
 namespace TSP_WPF
 {
@@ -23,26 +24,7 @@ namespace TSP_WPF
         public MainWindow()
         {
             InitializeComponent();
-        }
-
-        private void browseFile_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void startButton_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void stopButton_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void pauseButton_Click(object sender, RoutedEventArgs e)
-        {
-
+            layoutGrid.DataContext = new MainViewModel(this);
         }
     }
 }

@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:syncfusion="http://schemas.syncfusion.com/wpf"   
-        Title="MainWindow" Height="900" Width="1600" FontSize="15">
+        Title="MainWindow" Height="1000" Width="1600" Top="20" FontSize="15">
     <Window.Resources>
         <Style x:Key="menuLabel" TargetType="Label">
             <Setter Property="FontSize" Value="20"/>
@@ -20,6 +20,7 @@
         <Style TargetType="TextBox">
             <Setter Property="MinWidth" Value="100"/>
             <Setter Property="MaxHeight" Value="50"/>
+            <Setter Property="MinHeight" Value="30"/>
         </Style>
 
         <Style TargetType="StackPanel">
@@ -45,21 +46,51 @@
             <Setter Property="Margin" Value="10"/>
         </Style>
 
-        <!--<Style x:Key="stopBtn" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+        <Style x:Key="startBtn" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
             <Style.Triggers>
-                <DataTrigger Binding="{Binding IsRefreshing}" Value="False">
-                    <Setter Property="Background" Value="Red"/>
+                <DataTrigger Binding="{Binding AbleToStart}" Value="True">
+                    <Setter Property="Background" Value="Green"/>
+                    <Setter Property="IsEnabled" Value="True"/>
                 </DataTrigger>
             </Style.Triggers>
         </Style>
 
-        <Style x:Key="refreshBtn" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+        <Style x:Key="pauseBtn" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
             <Style.Triggers>
-                <DataTrigger Binding="{Binding IsRefreshing}" Value="True">
-                    <Setter Property="Background" Value="Green"/>
+                <DataTrigger Binding="{Binding AbleToPause}" Value="True">
+                    <Setter Property="Background" Value="Yellow"/>
+                    <Setter Property="IsEnabled" Value="True"/>
                 </DataTrigger>
             </Style.Triggers>
-        </Style>-->
+        </Style>
+
+        <Style x:Key="unpauseBtn" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding AbleToUnpause}" Value="True">
+                    <Setter Property="Background" Value="Yellow"/>
+                    <Setter Property="IsEnabled" Value="True"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="stopBtn" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding AbleToStop}" Value="True">
+                    <Setter Property="Background" Value="Red"/>
+                    <Setter Property="IsEnabled" Value="True"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="exitBtn" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding AbleToExit}" Value="True">
+                    <Setter Property="Background" Value="DarkSlateGray"/>
+                    <Setter Property="Foreground" Value="White"/>
+                    <Setter Property="IsEnabled" Value="True"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
     </Window.Resources>
     
     <Grid x:Name="layoutGrid">
@@ -85,8 +116,10 @@
             <Border Grid.Row="0">
                 <StackPanel >
                     <Label Content="TSP File" Style="{StaticResource menuLabel}"/>
-                    <TextBox Text="{Binding FilePath}" IsReadOnly="True"/>
-                    <Button x:Name="browseFile" Content="Browse" Click="browseFile_Click"/>
+                    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                        <TextBox Text="{Binding FilePath}" TextWrapping="NoWrap" IsReadOnly="True"/>
+                    </ScrollViewer>
+                    <Button x:Name="browseFile" Content="Browse" Command="{Binding LoadFileCommand}"/>
                 </StackPanel>
             </Border>
 
@@ -95,7 +128,7 @@
                     <Label Content="Mechanism" Style="{StaticResource menuLabel}"/>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                         <RadioButton IsChecked="{Binding TasksChecked}" GroupName="mechanismRadio">Tasks</RadioButton>
-                        <RadioButton IsChecked="{Binding ProcessesChecked}" GroupName="mechanismRadio">Processes</RadioButton>
+                        <RadioButton IsChecked="{Binding ThreadsChecked}" GroupName="mechanismRadio">Threads</RadioButton>
                     </StackPanel>
                 </StackPanel>
             </Border>
@@ -149,9 +182,17 @@
             <Border Grid.Row="5">
                 <StackPanel>
                     <Label Content="Controls" Style="{StaticResource menuLabel}"/>
-                    <Button x:Name="startButton" Click="startButton_Click">Start</Button>
-                    <Button x:Name="pauseButton" Click="pauseButton_Click">Pause</Button>
-                    <Button x:Name="stopButton" Click="stopButton_Click">Stop</Button>
+                    <Button x:Name="startButton" Command="{Binding StartCommand}"
+                            Style="{StaticResource startBtn}" IsEnabled="{Binding AbleToStart}">Start</Button>
+                    <Button x:Name="pauseButton" Command="{Binding PauseCommand}"
+                            Style="{StaticResource pauseBtn}" IsEnabled="{Binding AbleToPause}">Pause</Button>
+                    <Button x:Name="unpauseButton" Command="{Binding UnpauseCommand}"
+                            Style="{StaticResource unpauseBtn}" IsEnabled="{Binding AbleToUnpause}">Unpause</Button>
+                    <Button x:Name="stopButton" Command="{Binding StopCommand}"
+                            Style="{StaticResource stopBtn}" IsEnabled="{Binding AbleToStop}">Stop</Button>
+                    <Button x:Name="exitButton" Command="{Binding ExitCommand}"
+                            Style="{StaticResource exitBtn}" IsEnabled="{Binding AbleToExit}">Exit</Button>
+                    <Button x:Name="checkButton" Command="{Binding CheckDataCommand}" >Check Data</Button>
                 </StackPanel>
             </Border>
         </Grid>
@@ -170,15 +211,18 @@
             <Border Grid.Row="1">
                 <StackPanel>
                     <Label Style="{StaticResource menuLabel}">Optimal Tour</Label>
-                    <DataGrid ItemsSource="{Binding OptimalTour}" AutoGenerateColumns="False" 
-                              MinColumnWidth="150" FontSize="15" HorizontalScrollBarVisibility="Auto"
+                    <ScrollViewer Height="200" ScrollViewer.VerticalScrollBarVisibility="Auto">
+                        <DataGrid ItemsSource="{Binding OptimalTour}" AutoGenerateColumns="False" 
+                              MinColumnWidth="150" FontSize="15"
                               IsReadOnly="True">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="ID" Width="*" Binding="{Binding Id}"/>
-                            <DataGridTextColumn Header="X" Width="*" Binding="{Binding X}"/>
-                            <DataGridTextColumn Header="Y" Width="*" Binding="{Binding Y}"/>
-                        </DataGrid.Columns>
-                    </DataGrid>
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="ID" Width="*" Binding="{Binding Id}"/>
+                                <DataGridTextColumn Header="X" Width="*" Binding="{Binding X}"/>
+                                <DataGridTextColumn Header="Y" Width="*" Binding="{Binding Y}"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </ScrollViewer>
+                    
                 </StackPanel>
             </Border>
         </Grid>
