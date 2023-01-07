@@ -6,11 +6,12 @@
         xmlns:local="clr-namespace:TSP_WPF"
         mc:Ignorable="d"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
-        xmlns:syncfusion="http://schemas.syncfusion.com/wpf"   
-        Title="MainWindow" Height="1000" Width="1600" Top="20" FontSize="15">
+        xmlns:helpers="clr-namespace:TSP_WPF.Helpers"
+        Title="MainWindow" Height="1000" Width="1600" Top="20" FontSize="13">
     <Window.Resources>
         <Style x:Key="menuLabel" TargetType="Label">
-            <Setter Property="FontSize" Value="20"/>
+            <Setter Property="Margin" Value="0 0 0 5"/>
+            <Setter Property="FontSize" Value="15"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
             <Setter Property="HorizontalContentAlignment" Value="Center"/>
             <Setter Property="Background" Value="Black"/>
@@ -32,6 +33,9 @@
 
         <Style TargetType="Border">
             <Setter Property="Padding" Value="5"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="BorderBrush" Value="Black"/>
+            <Setter Property="BorderThickness" Value="0.5"/>
         </Style>
 
         <Style TargetType="Button">
@@ -98,9 +102,6 @@
             <ColumnDefinition Width="1*"/>
             <ColumnDefinition Width="2*"/>
         </Grid.ColumnDefinitions>
-
-        <Border Grid.Column="0" BorderBrush="Black" BorderThickness="1"/>
-        <Border Grid.Column="1" BorderBrush="Black" BorderThickness="1"/>
 
 
         <Grid Grid.Column="0" x:Name="menuGrid">
@@ -204,7 +205,54 @@
                 <RowDefinition Height="1*"></RowDefinition>
             </Grid.RowDefinitions>
 
-            <Border Grid.Row="0">
+            <Border Grid.Row="0" Padding="20">
+                <Grid helpers:SizeObserver.Observe="True"
+                      helpers:SizeObserver.ObservedWidth="{Binding CanvasWidth, Mode=OneWayToSource}"
+                      helpers:SizeObserver.ObservedHeight="{Binding CanvasHeight, Mode=OneWayToSource}">
+
+                    
+                    <ItemsControl ItemsSource="{Binding EdgeViewModels}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <Canvas Background="LightBlue"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Line X1="{Binding X1}" Y1="{Binding Y1}"
+                            X2="{Binding X2}" Y2="{Binding Y2}"
+                            Stroke="DarkBlue" StrokeThickness="2">
+                                </Line>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    
+                    <ItemsControl x:Name="canvas" ItemsSource="{Binding CityViewModels}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <Canvas/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Ellipse Width="15" Height="15" Fill="Red" VerticalAlignment="Center"
+                                 HorizontalAlignment="Center">
+                                    <Ellipse.RenderTransform>
+                                        <TranslateTransform X="-7.5" Y="-7.5" />
+                                    </Ellipse.RenderTransform>
+                                </Ellipse>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                        <ItemsControl.ItemContainerStyle>
+                            <Style TargetType="ContentPresenter">
+                                <Setter Property="Canvas.Left" Value="{Binding X}" />
+                                <Setter Property="Canvas.Top" Value="{Binding Y}" />
+                            </Style>
+                        </ItemsControl.ItemContainerStyle>
+                    </ItemsControl>
+
+                    
+                </Grid>
                 
             </Border>
 
@@ -213,8 +261,7 @@
                     <Label Style="{StaticResource menuLabel}">Optimal Tour</Label>
                     <ScrollViewer Height="200" ScrollViewer.VerticalScrollBarVisibility="Auto">
                         <DataGrid ItemsSource="{Binding OptimalTour}" AutoGenerateColumns="False" 
-                              MinColumnWidth="150" FontSize="15"
-                              IsReadOnly="True">
+                              MinColumnWidth="150" IsReadOnly="True">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="ID" Width="*" Binding="{Binding Id}"/>
                                 <DataGridTextColumn Header="X" Width="*" Binding="{Binding X}"/>
