@@ -7,12 +7,27 @@ using System.IO;
 using System.Reflection;
 using TSP_WPF.Helpers;
 using TSP_Shared.Models;
+using H.Pipes;
+using System.Threading.Tasks;
+using System;
+using System.Threading;
+using Xceed.Wpf.Toolkit;
+using System.Collections.Generic;
+using System.Linq;
+using System.Windows;
+using H.Pipes.Args;
+using Microsoft.VisualBasic;
+using System.Timers;
 
 namespace TSP_WPF.ViewModels
 {
 
     public partial class MainViewModel : ObservableObject
     {
+        private PipeServer<PipeMessage> _pipeServer;
+
+        private PausableTimer _timer;
+
         public enum ApplicationState
         {
             DATA_NOT_LOADED,
@@ -67,7 +82,7 @@ namespace TSP_WPF.ViewModels
         [ObservableProperty]
         private MainWindow _window;
 
-        private string _solutionPath = Directory.GetParent(System.IO.Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName;
+        private readonly string _solutionPath = Directory.GetParent(System.IO.Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName;
 
         [ObservableProperty]
         private string _filePath;
@@ -86,6 +101,9 @@ namespace TSP_WPF.ViewModels
 
         [ObservableProperty]
         private int _howLongPhase2;
+
+        [ObservableProperty]
+        private int _numberOfEpochs;
 
         [ObservableProperty]
         private double _bestResult;
@@ -112,14 +130,18 @@ namespace TSP_WPF.ViewModels
 
         public MainViewModel(MainWindow window)
         {
+            Task.Run(async () => await Server());
+
+
             _window = window;
             AppState = ApplicationState.DATA_NOT_LOADED;
             FilePath = "File path...";
             TasksChecked = true;
             ThreadsChecked = false;
-            HowMany = 0;
-            HowLongPhase1 = 0;
-            HowLongPhase2 = 0;
+            HowMany = 4;
+            HowLongPhase1 = 5;
+            HowLongPhase2 = 5;
+            NumberOfEpochs = 5;
             BestResult = -1;
             BestThreadId = "-1";
             SolutionCount = -1;
@@ -178,12 +200,65 @@ namespace TSP_WPF.ViewModels
                 EdgeViewModels.Add(new EdgeViewModel(CityViewModels[i], CityViewModels[j]));
             }
         }
+        private async Task Server()
+        {
+            _pipeServer = new PipeServer<PipeMessage>("tsp-wpf");
+            _pipeServer.ClientConnected += ClientConnected;
+            _pipeServer.MessageReceived += MessageReceived;
+
+            await _pipeServer.StartAsync();
+            await Task.Delay(Timeout.InfiniteTimeSpan);
+        }
+
+        private async void ClientConnected(object? sender, ConnectionEventArgs<PipeMessage> args)
+        {
+            Console.WriteLine($"Client {args.Connection.PipeName} is now connected!");
+
+            await args.Connection.WriteAsync(new PipeMessage
+            {
+                CityList = Cities.ToList(),
+                Type = MessageType.START,
+                HowMany = HowMany
+            });
+        }
+
+        private void MessageReceived(object? sender, ConnectionMessageEventArgs<PipeMessage?> args)
+        {
+            Console.WriteLine($"Client {args.Connection.PipeName} says: {args.Message}");
+        }
+
 
         [RelayCommand]
         private void Start()
         {
             Debug.WriteLine("Start...");
             AppState = ApplicationState.RUNNING;
+
+            if (TasksChecked)
+            {
+                Process.Start(_solutionPath + @"\TSP-WPF\bin\Debug\net7.0\TSP-Task.exe");
+            }
+            else
+            {
+                Process.Start(_solutionPath + @"\TSP-WPF\bin\Debug\net7.0\TSP-Thread.exe");
+            }
+
+            InitTimer();
+        }
+
+        private void InitTimer()
+        {
+            var milisecs = (HowLongPhase1 + HowLongPhase2) * NumberOfEpochs * 1000;
+            _timer = new PausableTimer(milisecs);
+            _timer.Elapsed += new ElapsedEventHandler(TimeOutEvent);
+            _timer.AutoReset = false;
+            _timer.Start();
+            Debug.WriteLine($"Timer started at {DateTime.Now}");
+        }
+
+        private void TimeOutEvent(object? sender, ElapsedEventArgs e)
+        {
+            Stop();
         }
 
         [RelayCommand]
@@ -191,6 +266,9 @@ namespace TSP_WPF.ViewModels
         {
             Debug.WriteLine("Pause...");
             AppState = ApplicationState.PAUSED;
+            _pipeServer.WriteAsync(new PipeMessage { Type = MessageType.PAUSE });
+            _timer.Pause();
+            Debug.WriteLine($"Timer paused at {DateTime.Now}");
         }
 
         [RelayCommand]
@@ -198,6 +276,9 @@ namespace TSP_WPF.ViewModels
         {
             Debug.WriteLine("Unpause...");
             AppState = ApplicationState.RUNNING;
+            _pipeServer.WriteAsync(new PipeMessage { Type = MessageType.UNPAUSE });
+            _timer.Resume();
+            Debug.WriteLine($"Timer unpaused at {DateTime.Now}");
         }
 
         [RelayCommand]
@@ -205,6 +286,9 @@ namespace TSP_WPF.ViewModels
         {
             Debug.WriteLine("Stop...");
             AppState = ApplicationState.FINISHED;
+            _pipeServer.WriteAsync(new PipeMessage { Type = MessageType.STOP });
+            _timer.Stop();
+            Debug.WriteLine($"Timer stoped at {DateTime.Now}");
         }
 
         [RelayCommand]

@@ -152,6 +152,10 @@
                         <Label>Phase 2 [s]</Label>
                         <xctk:IntegerUpDown Name="howLongPhase2Control" Value="{Binding HowLongPhase2}" Width="100"/>
                     </StackPanel>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Label>Number of epochs</Label>
+                        <xctk:IntegerUpDown Name="numberOfEpochs" Value="{Binding NumberOfEpochs}" Width="100"/>
+                    </StackPanel>
                 </StackPanel>
             </Border>
 

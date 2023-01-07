@@ -6,6 +6,7 @@
     <RootNamespace>TSP_Thread</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <BaseOutputPath>D:\Studies\SEM 7\PLA .NET\Traveling-Salesman-WPF\Traveling-Salesman-WPF\TSP-WPF\bin</BaseOutputPath>
   </PropertyGroup>
 
   <Import Project="..\TSP-Shared\TSP-Shared.projitems" Label="Shared" />
