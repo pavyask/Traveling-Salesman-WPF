@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TSP_WPF.Models;
+using TSP_Shared.Models;
 
 namespace TSP_WPF.Helpers
 {

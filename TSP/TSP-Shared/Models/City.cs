@@ -1,4 +1,4 @@
-﻿namespace TSP_WPF.Models
+﻿namespace TSP_Shared.Models
 {
     public class City
     {

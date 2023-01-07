@@ -3,7 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33205.214
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TSP-WPF", "TSP-WPF\TSP-WPF.csproj", "{8E40E07B-C506-4041-BABB-308AEAB6EE88}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TSP-WPF", "TSP-WPF\TSP-WPF.csproj", "{8E40E07B-C506-4041-BABB-308AEAB6EE88}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TSP-Task", "TSP-Task\TSP-Task.csproj", "{D700982C-145E-4CD8-B67B-764BA92DE5EF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TSP-Thread", "TSP-Thread\TSP-Thread.csproj", "{A1AC4982-C208-4F9A-9AD0-3FA7DA94C06A}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "TSP-Shared", "TSP-Shared\TSP-Shared.shproj", "{36A52F6C-A02B-402E-B308-B2930CA05D09}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,11 +21,25 @@ Global
 		{8E40E07B-C506-4041-BABB-308AEAB6EE88}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8E40E07B-C506-4041-BABB-308AEAB6EE88}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8E40E07B-C506-4041-BABB-308AEAB6EE88}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D700982C-145E-4CD8-B67B-764BA92DE5EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D700982C-145E-4CD8-B67B-764BA92DE5EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D700982C-145E-4CD8-B67B-764BA92DE5EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D700982C-145E-4CD8-B67B-764BA92DE5EF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A1AC4982-C208-4F9A-9AD0-3FA7DA94C06A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A1AC4982-C208-4F9A-9AD0-3FA7DA94C06A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A1AC4982-C208-4F9A-9AD0-3FA7DA94C06A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A1AC4982-C208-4F9A-9AD0-3FA7DA94C06A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {44C495E6-EBD5-4AD0-904E-526A37521817}
+	EndGlobalSection
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		TSP-Shared\TSP-Shared.projitems*{36a52f6c-a02b-402e-b308-b2930ca05d09}*SharedItemsImports = 13
+		TSP-Shared\TSP-Shared.projitems*{8e40e07b-c506-4041-babb-308aeab6ee88}*SharedItemsImports = 5
+		TSP-Shared\TSP-Shared.projitems*{a1ac4982-c208-4f9a-9ad0-3fa7da94c06a}*SharedItemsImports = 5
+		TSP-Shared\TSP-Shared.projitems*{d700982c-145e-4cd8-b67b-764ba92de5ef}*SharedItemsImports = 5
 	EndGlobalSection
 EndGlobal

@@ -1,23 +1,16 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Win32;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Input;
 using TSP_WPF.Helpers;
-using TSP_WPF.Models;
+using TSP_Shared.Models;
 
 namespace TSP_WPF.ViewModels
 {
-    
+
     public partial class MainViewModel : ObservableObject
     {
         public enum ApplicationState
@@ -36,7 +29,7 @@ namespace TSP_WPF.ViewModels
         [NotifyPropertyChangedFor(nameof(AbleToStop))]
         [NotifyPropertyChangedFor(nameof(AbleToExit))]
         private ApplicationState _appState;
-        
+
         public bool AbleToStart => AppState == ApplicationState.DATA_LOADED || AppState == ApplicationState.FINISHED;
 
         public bool AbleToPause => AppState == ApplicationState.RUNNING;
@@ -45,7 +38,7 @@ namespace TSP_WPF.ViewModels
 
         public bool AbleToStop => AppState == ApplicationState.RUNNING || AppState == ApplicationState.PAUSED;
 
-        public bool AbleToExit => AppState==ApplicationState.DATA_LOADED || AppState== ApplicationState.FINISHED;
+        public bool AbleToExit => AppState == ApplicationState.DATA_LOADED || AppState == ApplicationState.FINISHED;
 
         private double _canvasWidth;
         public double CanvasWidth
@@ -179,7 +172,7 @@ namespace TSP_WPF.ViewModels
                 CityViewModels.Add(new CityViewModel(city.Id, xVM, yVM));
             }
 
-            for(var i = 0; i < OptimalTour.Count; i++)
+            for (var i = 0; i < OptimalTour.Count; i++)
             {
                 var j = (i + 1) % OptimalTour.Count;
                 EdgeViewModels.Add(new EdgeViewModel(CityViewModels[i], CityViewModels[j]));
@@ -190,7 +183,7 @@ namespace TSP_WPF.ViewModels
         private void Start()
         {
             Debug.WriteLine("Start...");
-            AppState= ApplicationState.RUNNING;
+            AppState = ApplicationState.RUNNING;
         }
 
         [RelayCommand]
@@ -239,12 +232,8 @@ namespace TSP_WPF.ViewModels
             double min = CalculateOffsetX();
             double max = Cities[0].X;
             foreach (City city in Cities)
-            {
                 if (city.X > max)
-                {
                     max = city.X;
-                }
-            }
 
             return CanvasWidth / (max - min);
         }
@@ -254,12 +243,8 @@ namespace TSP_WPF.ViewModels
             double min = CalculateOffsetY();
             double max = Cities[0].Y;
             foreach (City city in Cities)
-            {
                 if (city.Y > max)
-                {
                     max = city.Y;
-                }
-            }
 
             return CanvasHeight / (max - min);
         }
@@ -268,12 +253,8 @@ namespace TSP_WPF.ViewModels
         {
             double min = Cities[0].X;
             foreach (City city in Cities)
-            {
                 if (city.X < min)
-                {
                     min = city.X;
-                }
-            }
 
             return min;
         }
@@ -282,12 +263,8 @@ namespace TSP_WPF.ViewModels
         {
             double min = Cities[0].Y;
             foreach (City city in Cities)
-            {
                 if (city.Y < min)
-                {
                     min = city.Y;
-                }
-            }
 
             return min;
         }

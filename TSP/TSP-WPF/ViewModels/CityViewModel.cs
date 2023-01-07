@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TSP_WPF.Models;
-
-namespace TSP_WPF.ViewModels
+﻿namespace TSP_WPF.ViewModels
 {
     public class CityViewModel
     {
