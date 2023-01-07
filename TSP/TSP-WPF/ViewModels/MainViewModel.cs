@@ -17,15 +17,17 @@ using TSP_WPF.Models;
 
 namespace TSP_WPF.ViewModels
 {
+    
     public partial class MainViewModel : ObservableObject
     {
-        [ObservableProperty]
-        [NotifyPropertyChangedFor(nameof(AbleToStart))]
-        [NotifyPropertyChangedFor(nameof(AbleToPause))]
-        [NotifyPropertyChangedFor(nameof(AbleToUnpause))]
-        [NotifyPropertyChangedFor(nameof(AbleToStop))]
-        [NotifyPropertyChangedFor(nameof(AbleToExit))]
-        private bool _isLoaded;
+        public enum ApplicationState
+        {
+            DATA_NOT_LOADED,
+            DATA_LOADED,
+            RUNNING,
+            PAUSED,
+            FINISHED
+        }
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(AbleToStart))]
@@ -33,33 +35,17 @@ namespace TSP_WPF.ViewModels
         [NotifyPropertyChangedFor(nameof(AbleToUnpause))]
         [NotifyPropertyChangedFor(nameof(AbleToStop))]
         [NotifyPropertyChangedFor(nameof(AbleToExit))]
-        private bool _isStarted;
+        private ApplicationState _appState;
+        
+        public bool AbleToStart => AppState == ApplicationState.DATA_LOADED || AppState == ApplicationState.FINISHED;
 
-        [ObservableProperty]
-        [NotifyPropertyChangedFor(nameof(AbleToStart))]
-        [NotifyPropertyChangedFor(nameof(AbleToPause))]
-        [NotifyPropertyChangedFor(nameof(AbleToUnpause))]
-        [NotifyPropertyChangedFor(nameof(AbleToStop))]
-        [NotifyPropertyChangedFor(nameof(AbleToExit))]
-        private bool _isPaused;
+        public bool AbleToPause => AppState == ApplicationState.RUNNING;
 
-        [ObservableProperty]
-        [NotifyPropertyChangedFor(nameof(AbleToStart))]
-        [NotifyPropertyChangedFor(nameof(AbleToPause))]
-        [NotifyPropertyChangedFor(nameof(AbleToUnpause))]
-        [NotifyPropertyChangedFor(nameof(AbleToStop))]
-        [NotifyPropertyChangedFor(nameof(AbleToExit))]
-        private bool _isFinished;
+        public bool AbleToUnpause => AppState == ApplicationState.PAUSED;
 
-        public bool AbleToStart => IsLoaded && (!IsStarted || IsFinished);
+        public bool AbleToStop => AppState == ApplicationState.RUNNING || AppState == ApplicationState.PAUSED;
 
-        public bool AbleToPause => IsStarted && !IsPaused && !IsFinished;
-
-        public bool AbleToUnpause => IsStarted && IsPaused && !IsFinished;
-
-        public bool AbleToStop => IsStarted && !IsFinished;
-
-        public bool AbleToExit => !IsStarted || IsFinished;
+        public bool AbleToExit => AppState==ApplicationState.DATA_LOADED || AppState== ApplicationState.FINISHED;
 
         private double _canvasWidth;
         public double CanvasWidth
@@ -134,15 +120,7 @@ namespace TSP_WPF.ViewModels
         public MainViewModel(MainWindow window)
         {
             _window = window;
-
-            var canvas = window.canvas;
-
-            IsLoaded = false;
-            IsStarted = false;
-            IsPaused = false;
-            IsFinished = false;
-
-
+            AppState = ApplicationState.DATA_NOT_LOADED;
             FilePath = "File path...";
             TasksChecked = true;
             ThreadsChecked = false;
@@ -185,8 +163,8 @@ namespace TSP_WPF.ViewModels
                 OptimalTour.Add(city);
             }
 
+            AppState = ApplicationState.DATA_LOADED;
             RefreshCanvas();
-            IsLoaded = true;
         }
 
         private void RefreshCanvas()
@@ -212,32 +190,28 @@ namespace TSP_WPF.ViewModels
         private void Start()
         {
             Debug.WriteLine("Start...");
-            IsStarted = true;
-            IsPaused = false;
-            IsFinished = false;
+            AppState= ApplicationState.RUNNING;
         }
 
         [RelayCommand]
         private void Pause()
         {
             Debug.WriteLine("Pause...");
-            IsPaused = true;
+            AppState = ApplicationState.PAUSED;
         }
 
         [RelayCommand]
         private void Unpause()
         {
             Debug.WriteLine("Unpause...");
-            IsPaused = false;
+            AppState = ApplicationState.RUNNING;
         }
 
         [RelayCommand]
         private void Stop()
         {
             Debug.WriteLine("Stop...");
-            IsStarted = false;
-            IsPaused = false;
-            IsFinished = true;
+            AppState = ApplicationState.FINISHED;
         }
 
         [RelayCommand]
