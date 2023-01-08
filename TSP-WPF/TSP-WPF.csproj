@@ -15,6 +15,10 @@
     <PackageReference Include="System.IO.Pipes" Version="4.3.0" />
   </ItemGroup>
 
-  <Import Project="..\TSP-Shared\TSP-Shared.projitems" Label="Shared" />
+  <ItemGroup>
+    <Reference Include="TSP-Shared">
+      <HintPath>..\TSP-Shared\bin\Debug\net7.0\TSP-Shared.dll</HintPath>
+    </Reference>
+  </ItemGroup>
 
 </Project>

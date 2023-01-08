@@ -96,7 +96,7 @@
             </Style.Triggers>
         </Style>
     </Window.Resources>
-    
+
     <Grid x:Name="layoutGrid">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>
@@ -145,6 +145,10 @@
                 <StackPanel>
                     <Label Content="How Long" Style="{StaticResource menuLabel}"/>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Label>Max Duration</Label>
+                        <xctk:IntegerUpDown Name="maxDuration" Value="{Binding MaxDuration}" Width="100"/>
+                    </StackPanel>
+                    <!--<StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                         <Label>Phase 1 [s]</Label>
                         <xctk:IntegerUpDown Name="howLongPhase1Control" Value="{Binding HowLongPhase1}" Width="100"/>
                     </StackPanel>
@@ -155,7 +159,7 @@
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                         <Label>Number of epochs</Label>
                         <xctk:IntegerUpDown Name="numberOfEpochs" Value="{Binding NumberOfEpochs}" Width="100"/>
-                    </StackPanel>
+                    </StackPanel>-->
                 </StackPanel>
             </Border>
 
@@ -179,7 +183,7 @@
                             <Label>Progress:</Label>
                             <Label Content="{Binding ProgressString}"/>
                         </StackPanel>
-                        <ProgressBar Value="{Binding Progress}" Width="auto" Height="25"/>
+                        <ProgressBar Minimum="0" Value="{Binding Progress}" Maximum="{Binding MaxDuration}" Width="auto" Height="25"/>
                     </StackPanel>
                 </StackPanel>
             </Border>
@@ -189,10 +193,10 @@
                     <Label Content="Controls" Style="{StaticResource menuLabel}"/>
                     <Button x:Name="startButton" Command="{Binding StartCommand}"
                             Style="{StaticResource startBtn}" IsEnabled="{Binding AbleToStart}">Start</Button>
-                    <Button x:Name="pauseButton" Command="{Binding PauseCommand}"
+                    <!--<Button x:Name="pauseButton" Command="{Binding PauseCommand}"
                             Style="{StaticResource pauseBtn}" IsEnabled="{Binding AbleToPause}">Pause</Button>
                     <Button x:Name="unpauseButton" Command="{Binding UnpauseCommand}"
-                            Style="{StaticResource unpauseBtn}" IsEnabled="{Binding AbleToUnpause}">Unpause</Button>
+                            Style="{StaticResource unpauseBtn}" IsEnabled="{Binding AbleToUnpause}">Unpause</Button>-->
                     <Button x:Name="stopButton" Command="{Binding StopCommand}"
                             Style="{StaticResource stopBtn}" IsEnabled="{Binding AbleToStop}">Stop</Button>
                     <Button x:Name="exitButton" Command="{Binding ExitCommand}"
@@ -202,7 +206,7 @@
             </Border>
         </Grid>
 
-        
+
         <Grid Grid.Column="1" x:Name="solutionGrid">
             <Grid.RowDefinitions>
                 <RowDefinition Height="3*"></RowDefinition>
@@ -214,7 +218,7 @@
                       helpers:SizeObserver.ObservedWidth="{Binding CanvasWidth, Mode=OneWayToSource}"
                       helpers:SizeObserver.ObservedHeight="{Binding CanvasHeight, Mode=OneWayToSource}">
 
-                    
+
                     <ItemsControl ItemsSource="{Binding EdgeViewModels}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
@@ -230,7 +234,7 @@
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
-                    
+
                     <ItemsControl x:Name="canvas" ItemsSource="{Binding CityViewModels}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
@@ -255,9 +259,9 @@
                         </ItemsControl.ItemContainerStyle>
                     </ItemsControl>
 
-                    
+
                 </Grid>
-                
+
             </Border>
 
             <Border Grid.Row="1">
@@ -273,7 +277,7 @@
                             </DataGrid.Columns>
                         </DataGrid>
                     </ScrollViewer>
-                    
+
                 </StackPanel>
             </Border>
         </Grid>

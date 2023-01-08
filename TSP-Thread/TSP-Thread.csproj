@@ -9,6 +9,14 @@
     <BaseOutputPath>D:\Studies\SEM 7\PLA .NET\Traveling-Salesman-WPF\Traveling-Salesman-WPF\TSP-WPF\bin</BaseOutputPath>
   </PropertyGroup>
 
-  <Import Project="..\TSP-Shared\TSP-Shared.projitems" Label="Shared" />
+  <ItemGroup>
+    <PackageReference Include="H.Pipes" Version="2.0.43" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="TSP-Shared">
+      <HintPath>..\TSP-Shared\bin\Debug\net7.0\TSP-Shared.dll</HintPath>
+    </Reference>
+  </ItemGroup>
 
 </Project>

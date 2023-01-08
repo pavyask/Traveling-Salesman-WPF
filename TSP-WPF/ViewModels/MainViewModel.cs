@@ -7,17 +7,15 @@ using System.IO;
 using System.Reflection;
 using TSP_WPF.Helpers;
 using TSP_Shared.Models;
+using TSP_Shared.Pipes;
 using H.Pipes;
 using System.Threading.Tasks;
 using System;
 using System.Threading;
-using Xceed.Wpf.Toolkit;
-using System.Collections.Generic;
 using System.Linq;
-using System.Windows;
 using H.Pipes.Args;
-using Microsoft.VisualBasic;
 using System.Timers;
+using System.Windows;
 
 namespace TSP_WPF.ViewModels
 {
@@ -106,19 +104,22 @@ namespace TSP_WPF.ViewModels
         private int _numberOfEpochs;
 
         [ObservableProperty]
+        private int _maxDuration;
+
+        [ObservableProperty]
         private double _bestResult;
 
         [ObservableProperty]
         private string _bestThreadId;
 
         [ObservableProperty]
-        private int _solutionCount;
+        private long _solutionCount;
 
         [ObservableProperty]
         private string _progressString;
 
         [ObservableProperty]
-        private int _progress;
+        private double _progress;
 
         public ObservableCollection<City> OptimalTour { get; private set; }
 
@@ -131,17 +132,16 @@ namespace TSP_WPF.ViewModels
         public MainViewModel(MainWindow window)
         {
             Task.Run(async () => await Server());
-
-
             _window = window;
             AppState = ApplicationState.DATA_NOT_LOADED;
             FilePath = "File path...";
             TasksChecked = true;
             ThreadsChecked = false;
-            HowMany = 4;
+            HowMany = 2;
             HowLongPhase1 = 5;
             HowLongPhase2 = 5;
-            NumberOfEpochs = 5;
+            NumberOfEpochs = 100;
+            MaxDuration = 20_000;
             BestResult = -1;
             BestThreadId = "-1";
             SolutionCount = -1;
@@ -202,9 +202,9 @@ namespace TSP_WPF.ViewModels
         }
         private async Task Server()
         {
-            _pipeServer = new PipeServer<PipeMessage>("tsp-wpf");
-            _pipeServer.ClientConnected += ClientConnected;
+            _pipeServer = new PipeServer<PipeMessage>("tsp");
             _pipeServer.MessageReceived += MessageReceived;
+            _pipeServer.ClientConnected += ClientConnected;
 
             await _pipeServer.StartAsync();
             await Task.Delay(Timeout.InfiniteTimeSpan);
@@ -212,19 +212,50 @@ namespace TSP_WPF.ViewModels
 
         private async void ClientConnected(object? sender, ConnectionEventArgs<PipeMessage> args)
         {
-            Console.WriteLine($"Client {args.Connection.PipeName} is now connected!");
+            Debug.WriteLine($"Client {args.Connection.PipeName} is now connected!");
+            Debug.WriteLine($"{MaxDuration}");
 
             await args.Connection.WriteAsync(new PipeMessage
             {
-                CityList = Cities.ToList(),
+                CitiesSolution = new CitiesSolution(Cities.ToList()),
                 Type = MessageType.START,
-                HowMany = HowMany
+                HowMany = HowMany,
+                MaxDurationInMilisecs = MaxDuration,
             });
         }
 
-        private void MessageReceived(object? sender, ConnectionMessageEventArgs<PipeMessage?> args)
+        private async void MessageReceived(object? sender, ConnectionMessageEventArgs<PipeMessage?> args)
         {
-            Console.WriteLine($"Client {args.Connection.PipeName} says: {args.Message}");
+            Debug.WriteLine($"Client {args.Connection.PipeName} says: {args.Message}");
+            if (args.Message.Type == MessageType.BEST_SOLUTION)
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    OptimalTour.Clear();
+                    foreach (var city in args.Message.CitiesSolution.Cities)
+                    {
+                        OptimalTour.Add(city);
+                    }
+                    BestResult = args.Message.CitiesSolution.CalculateTotalDistance();
+                    BestThreadId = args.Message.ThreadId;
+                    SolutionCount = args.Message.SolutionCount;
+                    Progress = args.Message.Progress;
+                    ProgressString = $"{Progress}/{MaxDuration}";
+
+                    RefreshCanvas();
+                }); 
+            }
+            else if(args.Message.Type == MessageType.PROGRESS)
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    Progress = args.Message.Progress;
+                    SolutionCount = args.Message.SolutionCount;
+                    ProgressString = $"{Progress}/{MaxDuration}";
+                });
+            }
+
+            
         }
 
 
@@ -233,7 +264,7 @@ namespace TSP_WPF.ViewModels
         {
             Debug.WriteLine("Start...");
             AppState = ApplicationState.RUNNING;
-
+            InitTimer();
             if (TasksChecked)
             {
                 Process.Start(_solutionPath + @"\TSP-WPF\bin\Debug\net7.0\TSP-Task.exe");
@@ -243,13 +274,12 @@ namespace TSP_WPF.ViewModels
                 Process.Start(_solutionPath + @"\TSP-WPF\bin\Debug\net7.0\TSP-Thread.exe");
             }
 
-            InitTimer();
+            Debug.WriteLine($"MaxDurationInMilisecs: {MaxDuration}");
         }
 
         private void InitTimer()
         {
-            var milisecs = (HowLongPhase1 + HowLongPhase2) * NumberOfEpochs * 1000;
-            _timer = new PausableTimer(milisecs);
+            _timer = new PausableTimer(MaxDuration);
             _timer.Elapsed += new ElapsedEventHandler(TimeOutEvent);
             _timer.AutoReset = false;
             _timer.Start();
@@ -289,6 +319,7 @@ namespace TSP_WPF.ViewModels
             _pipeServer.WriteAsync(new PipeMessage { Type = MessageType.STOP });
             _timer.Stop();
             Debug.WriteLine($"Timer stoped at {DateTime.Now}");
+            Progress = MaxDuration;
         }
 
         [RelayCommand]
